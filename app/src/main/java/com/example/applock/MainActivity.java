@@ -16,7 +16,7 @@ import android.widget.TextView;
 
 public class MainActivity extends AppCompatActivity {
 
-    Button allAppsBtn, lockedAppsBtn, homeBtn;
+    Button allAppsBtn, lockedAppsBtn, homeBtn, settingsBtn, notificationsBtn;
 
 
     @SuppressLint({"WrongViewCast", "MissingInflatedId"})
@@ -28,6 +28,8 @@ public class MainActivity extends AppCompatActivity {
         allAppsBtn = findViewById(R.id.allAppsBtn);
         lockedAppsBtn = findViewById(R.id.lockedAppsBtn);
         homeBtn = findViewById(R.id.homeBtn);
+        settingsBtn = findViewById(R.id.settingsBtn);
+        notificationsBtn= findViewById(R.id.notificationsBtn);
 
         allAppsBtn.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -47,6 +49,18 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 replaceFragment(new AllAppsFragment());
+            }
+        });
+        settingsBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                replaceFragment(new SettingsFragment());
+            }
+        });
+        notificationsBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                replaceFragment(new NotificationFragment());
             }
         });
 
