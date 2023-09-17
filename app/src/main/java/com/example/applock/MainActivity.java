@@ -24,11 +24,8 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        AllAppsFragment allAppsFragment = new AllAppsFragment();
 
-
-
-        androidx.appcompat.widget.Toolbar toolbar = (Toolbar) findViewById(R.id.toolBar);
-        setSupportActionBar(toolbar);
 
 
         allAppsBtn = findViewById(R.id.allAppsBtn);
@@ -41,6 +38,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 replaceFragment(new AllAppsFragment());
+                allAppsFragment.getAllApps();
             }
         });
 
