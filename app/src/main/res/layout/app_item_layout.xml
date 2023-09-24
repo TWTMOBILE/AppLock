@@ -23,7 +23,8 @@
             android:id="@+id/titleTextView"
             android:textSize="14sp"
             android:textStyle="bold"
-            android:text="App Title"/>
+            android:text="App Title"
+            android:textColor="@color/white"/>
         <Space
             android:layout_width="4dp"
             android:layout_height="0dp"/>
@@ -32,7 +33,19 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="1.0"
-            android:id="@+id/versionId"/>
+            android:id="@+id/versionId"
+            android:textColor="@color/white"/>
     </LinearLayout>
+
+    <View
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_weight="1"/>
+
+    <androidx.appcompat.widget.SwitchCompat
+        android:layout_width="48dp"
+        android:layout_height="wrap_content"
+        android:layout_gravity="right"
+        android:layout_marginRight="15dp"/>
 
 </LinearLayout>

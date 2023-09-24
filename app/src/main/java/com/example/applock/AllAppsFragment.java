@@ -83,7 +83,7 @@ public class AllAppsFragment extends Fragment{
             List<ApplicationInfo> infos = packageManager.getInstalledApplications(integers[0]);
 
             for (ApplicationInfo info:infos){
-                if (!mIncludeSystemApps && (info.flags & ApplicationInfo.FLAG_SYSTEM) == 1){
+                if (mIncludeSystemApps && (info.flags & ApplicationInfo.FLAG_SYSTEM) == 1){
                     continue;
                 }
                 AppInfo app = new AppInfo();
