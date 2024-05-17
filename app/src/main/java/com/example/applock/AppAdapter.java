@@ -5,6 +5,7 @@ import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.graphics.drawable.Drawable;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -20,50 +21,76 @@ import java.util.List;
 
 public class AppAdapter extends ArrayAdapter<AppInfo> {
 
+    private static final String TAG = "AppAdapter";
     private final LayoutInflater layoutInflater;
     private final PackageManager packageManager;
     private final List<AppInfo> apps;
+    private final PinCodeManager pinCodeManager;
+    private final Context context;
 
     public AppAdapter(Context context, List<AppInfo> apps) {
         super(context, R.layout.app_item_layout, apps);
         layoutInflater = LayoutInflater.from(context);
         packageManager = context.getPackageManager();
         this.apps = apps;
+        this.context = context;
+        this.pinCodeManager = new PinCodeManager(context);
     }
 
     @NonNull
     @Override
     public View getView(int position, @Nullable View convertView, @NonNull ViewGroup parent) {
-        AppInfo current = apps.get(position);
-        View view = convertView;
-        if (view == null) {
-            view = layoutInflater.inflate(R.layout.app_item_layout, parent, false);
+        ViewHolder holder;
+        if (convertView == null) {
+            convertView = layoutInflater.inflate(R.layout.app_item_layout, parent, false);
+            holder = new ViewHolder();
+            holder.textViewTitle = convertView.findViewById(R.id.titleTextView);
+            holder.textVersion = convertView.findViewById(R.id.versionId);
+            holder.imageView = convertView.findViewById(R.id.iconImage);
+            holder.switchCompat = convertView.findViewById(R.id.switchCompat);
+            convertView.setTag(holder);
+        } else {
+            holder = (ViewHolder) convertView.getTag();
         }
 
-        TextView textViewTitle = view.findViewById(R.id.titleTextView);
-        TextView textVersion = view.findViewById(R.id.versionId);
-        ImageView imageView = view.findViewById(R.id.iconImage);
-        SwitchCompat switchCompat = view.findViewById(R.id.switchCompat);
+        AppInfo current = apps.get(position);
 
-        textViewTitle.setText(current.label);
+        holder.textViewTitle.setText(current.label);
 
         try {
             PackageInfo packageInfo = packageManager.getPackageInfo(current.info.packageName, 0);
             String versionInfo = packageInfo.versionName;
-            if (!TextUtils.isEmpty(versionInfo)) {
-                textVersion.setText(versionInfo);
-            } else {
-                textVersion.setText("N/A");
-            }
+            holder.textVersion.setText(TextUtils.isEmpty(versionInfo) ? "N/A" : versionInfo);
         } catch (PackageManager.NameNotFoundException e) {
-            textVersion.setText("N/A");
+            holder.textVersion.setText("N/A");
         }
 
         Drawable icon = current.info.loadIcon(packageManager);
-        imageView.setImageDrawable(icon);
+        holder.imageView.setImageDrawable(icon);
 
-        // Set up switch if needed (add click listener or logic to handle switch state)
+        // Set the switch state based on saved preferences
+        boolean isLocked = pinCodeManager.isAppLocked(current.info.packageName);
+        holder.switchCompat.setChecked(isLocked);
+        Log.d(TAG, "Package: " + current.info.packageName + " is locked: " + isLocked);
 
-        return view;
+        // Add switch change listener
+        holder.switchCompat.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            if (isChecked) {
+                pinCodeManager.lockApp(current.info.packageName);
+                Log.d(TAG, "Locked app: " + current.info.packageName);
+            } else {
+                pinCodeManager.unlockApp(current.info.packageName);
+                Log.d(TAG, "Unlocked app: " + current.info.packageName);
+            }
+        });
+
+        return convertView;
+    }
+
+    static class ViewHolder {
+        TextView textViewTitle;
+        TextView textVersion;
+        ImageView imageView;
+        SwitchCompat switchCompat;
     }
 }

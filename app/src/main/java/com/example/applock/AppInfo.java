@@ -7,4 +7,5 @@ public class AppInfo {
     public ApplicationInfo info;
     public CharSequence label;
     public Drawable icon;
+    public boolean isLocked;
 }

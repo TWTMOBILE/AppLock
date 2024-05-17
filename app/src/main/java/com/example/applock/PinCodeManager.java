@@ -4,9 +4,13 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
 
+import java.util.HashSet;
+import java.util.Set;
+
 public class PinCodeManager {
 
     private static final String PREF_PIN_CODE_KEY = "pin_code";
+    private static final String PREF_LOCKED_APPS_KEY = "locked_apps";
 
     private SharedPreferences sharedPreferences;
 
@@ -29,5 +33,22 @@ public class PinCodeManager {
     public boolean validatePinCode(String enteredPinCode) {
         String savedPinCode = getPinCode();
         return enteredPinCode.equals(savedPinCode);
+    }
+
+    public void lockApp(String packageName) {
+        Set<String> lockedApps = sharedPreferences.getStringSet(PREF_LOCKED_APPS_KEY, new HashSet<>());
+        lockedApps.add(packageName);
+        sharedPreferences.edit().putStringSet(PREF_LOCKED_APPS_KEY, lockedApps).apply();
+    }
+
+    public void unlockApp(String packageName) {
+        Set<String> lockedApps = sharedPreferences.getStringSet(PREF_LOCKED_APPS_KEY, new HashSet<>());
+        lockedApps.remove(packageName);
+        sharedPreferences.edit().putStringSet(PREF_LOCKED_APPS_KEY, lockedApps).apply();
+    }
+
+    public boolean isAppLocked(String packageName) {
+        Set<String> lockedApps = sharedPreferences.getStringSet(PREF_LOCKED_APPS_KEY, new HashSet<>());
+        return lockedApps.contains(packageName);
     }
 }
