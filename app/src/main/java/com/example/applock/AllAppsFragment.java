@@ -1,32 +1,34 @@
 package com.example.applock;
 
+import android.app.Activity;
 import android.content.Intent;
 import android.content.pm.ApplicationInfo;
-import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import androidx.fragment.app.Fragment;
-import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
-
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ListView;
 
+import androidx.annotation.Nullable;
+import androidx.fragment.app.Fragment;
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
+
 import com.google.android.material.snackbar.Snackbar;
 
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.List;
 
 public class AllAppsFragment extends Fragment {
 
+    private static final int REQUEST_PIN_CODE = 1234;
     private View view;
     private ListView listView;
     private SwipeRefreshLayout swipeRefreshLayout;
+    private PinCodeManager pinCodeManager;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -35,23 +37,67 @@ public class AllAppsFragment extends Fragment {
         swipeRefreshLayout = view.findViewById(R.id.swipeToRefresh);
         listView.setTextFilterEnabled(true);
 
+        pinCodeManager = new PinCodeManager(requireContext());
+
         swipeRefreshLayout.setOnRefreshListener(this::refreshIt);
 
+        // Check if the pin code is set, if not, prompt user to set it
+        if (pinCodeManager.isPinCodeSet()) {
+            checkPinCode();
+        } else {
+            setPinCode();
+        }
+
         return view;
+    }
+
+    private void setPinCode() {
+        // Launch activity to set PIN code
+        Intent intent = new Intent(requireContext(), SetPinCodeActivity.class);
+        startActivityForResult(intent, REQUEST_PIN_CODE);
+    }
+
+    private void checkPinCode() {
+        // Launch activity to enter PIN code
+        Intent intent = new Intent(requireContext(), EnterPinCodeActivity.class);
+        startActivityForResult(intent, REQUEST_PIN_CODE);
+    }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == REQUEST_PIN_CODE) {
+            if (resultCode == Activity.RESULT_OK && data != null) {
+                // PIN code successfully entered or set
+                String pinCode = data.getStringExtra("pinCode");
+                if (pinCode != null && !pinCode.isEmpty()) {
+                    pinCodeManager.savePinCode(pinCode);
+                }
+                // Continue with app loading
+                refreshIt();
+            } else {
+                // PIN code not entered or set
+                setPinCode();
+            }
+        }
     }
 
     @Override
     public void onResume() {
         super.onResume();
-        refreshIt();
+        if (pinCodeManager.isPinCodeSet()) {
+            refreshIt();
+        } else {
+            setPinCode();
+        }
     }
 
     private void refreshIt() {
         LoadAppInfoTask loadAppInfoTask = new LoadAppInfoTask();
-        loadAppInfoTask.execute(PackageManager.GET_META_DATA);
+        loadAppInfoTask.execute();
     }
 
-    private class LoadAppInfoTask extends AsyncTask<Integer, Integer, List<AppInfo>> {
+    private class LoadAppInfoTask extends AsyncTask<Void, Void, List<AppInfo>> {
 
         @Override
         protected void onPreExecute() {
@@ -60,10 +106,10 @@ public class AllAppsFragment extends Fragment {
         }
 
         @Override
-        protected List<AppInfo> doInBackground(Integer... integers) {
+        protected List<AppInfo> doInBackground(Void... voids) {
             List<AppInfo> apps = new ArrayList<>();
             PackageManager packageManager = requireActivity().getPackageManager();
-            List<ApplicationInfo> infos = packageManager.getInstalledApplications(integers[0]);
+            List<ApplicationInfo> infos = packageManager.getInstalledApplications(PackageManager.GET_META_DATA);
 
             for (ApplicationInfo info : infos) {
                 try {
@@ -97,7 +143,5 @@ public class AllAppsFragment extends Fragment {
             swipeRefreshLayout.setRefreshing(false);
             Snackbar.make(listView, appInfos.size() + " launchable applications loaded", Snackbar.LENGTH_LONG).show();
         }
-
     }
-
 }
