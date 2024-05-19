@@ -18,13 +18,17 @@
         android:layout_toRightOf="@id/iconImage"
         android:layout_centerVertical="true"
         android:paddingLeft="10dp"
+        android:textColor="@color/white"
         android:textSize="16sp" />
 
     <TextView
         android:id="@+id/versionId"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:paddingTop="10dp"
+        android:paddingStart="10dp"
         android:layout_below="@id/titleTextView"
+        android:textColor="@color/white"
         android:layout_alignStart="@id/titleTextView"
         android:textSize="12sp" />
 

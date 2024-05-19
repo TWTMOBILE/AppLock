@@ -29,6 +29,7 @@ public class AllAppsFragment extends Fragment {
     private ListView listView;
     private SwipeRefreshLayout swipeRefreshLayout;
     private PinCodeManager pinCodeManager;
+    private boolean isPinVerified = false;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -42,10 +43,13 @@ public class AllAppsFragment extends Fragment {
         swipeRefreshLayout.setOnRefreshListener(this::refreshIt);
 
         // Check if the pin code is set, if not, prompt user to set it
-        if (pinCodeManager.isPinCodeSet()) {
+        if (!pinCodeManager.isPinCodeSet()) {
+            setPinCode();
+        } else if (!isPinVerified) {
             checkPinCode();
         } else {
-            setPinCode();
+            // Continue with app loading
+            refreshIt();
         }
 
         return view;
@@ -73,22 +77,13 @@ public class AllAppsFragment extends Fragment {
                 if (pinCode != null && !pinCode.isEmpty()) {
                     pinCodeManager.savePinCode(pinCode);
                 }
+                isPinVerified = true;
                 // Continue with app loading
                 refreshIt();
             } else {
-                // PIN code not entered or set
-                setPinCode();
+                // Handle if PIN code not entered correctly or cancelled
+                // For example, you might show a message or take appropriate action
             }
-        }
-    }
-
-    @Override
-    public void onResume() {
-        super.onResume();
-        if (pinCodeManager.isPinCodeSet()) {
-            refreshIt();
-        } else {
-            setPinCode();
         }
     }
 
