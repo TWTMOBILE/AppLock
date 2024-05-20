@@ -42,7 +42,8 @@ public class AppLockService extends AccessibilityService {
 
     @Override
     public void onAccessibilityEvent(AccessibilityEvent event) {
-        if (event.getEventType() == AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED) {
+        if (event.getEventType() == AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED ||
+                event.getEventType() == AccessibilityEvent.TYPE_WINDOW_CONTENT_CHANGED) {
             checkCurrentApp();
         }
     }
@@ -96,8 +97,4 @@ public class AppLockService extends AccessibilityService {
             }
         }
     };
-
-    public void setLockedActivityOpen(boolean isOpen) {
-        this.isLockedActivityOpen = isOpen;
-    }
 }

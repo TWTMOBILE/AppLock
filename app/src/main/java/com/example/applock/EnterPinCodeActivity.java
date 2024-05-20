@@ -38,8 +38,18 @@ public class EnterPinCodeActivity extends Activity {
     }
 
     @Override
+    protected void onStop() {
+        super.onStop();
+        notifyServiceActivityClosed();
+    }
+
+    @Override
     protected void onDestroy() {
         super.onDestroy();
+        notifyServiceActivityClosed();
+    }
+
+    private void notifyServiceActivityClosed() {
         Intent intent = new Intent(AppLockService.ACTION_UNLOCK);
         sendBroadcast(intent);
     }
