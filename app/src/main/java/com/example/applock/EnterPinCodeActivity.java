@@ -29,6 +29,10 @@ public class EnterPinCodeActivity extends Activity {
                 if (pinCodeManager.validatePinCode(enteredPin)) {
                     Intent intent = new Intent(AppLockService.ACTION_UNLOCK);
                     sendBroadcast(intent);
+
+                    pinCodeManager.setAppUnlocked(true);
+                    String lockedPackageName = getIntent().getStringExtra("locked_package_name");
+                    pinCodeManager.setUnlockedAppPackage(lockedPackageName);
                     finish();
                 } else {
                     pinCodeEditText.setError("Incorrect PIN");

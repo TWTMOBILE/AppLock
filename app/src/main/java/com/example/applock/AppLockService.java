@@ -16,6 +16,7 @@ public class AppLockService extends AccessibilityService {
     public static final String ACTION_UNLOCK = "com.example.applock.ACTION_UNLOCK";
     private PinCodeManager pinCodeManager;
     private boolean isLockedActivityOpen = false;
+    private String currentLockedApp = null;
     private Handler handler = new Handler();
     private Runnable checkAppRunnable;
 
@@ -50,7 +51,7 @@ public class AppLockService extends AccessibilityService {
 
     @Override
     public void onInterrupt() {
-        // Handle interruptions if needed
+        // Handle interruptions
     }
 
     @Override
@@ -73,17 +74,32 @@ public class AppLockService extends AccessibilityService {
             if (packageName != null) {
                 String currentPackageName = packageName.toString();
                 Log.d(TAG, "Detected package: " + currentPackageName);
-                if (pinCodeManager.isAppLocked(currentPackageName) && !isLockedActivityOpen) {
-                    Log.d(TAG, "Package is locked: " + currentPackageName);
-                    isLockedActivityOpen = true;
 
-                    // Adding a small delay to ensure the locked activity is opened properly
-                    handler.postDelayed(() -> {
-                        Intent intent = new Intent(AppLockService.this, EnterPinCodeActivity.class);
-                        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                        intent.putExtra("locked_package_name", currentPackageName);
-                        startActivity(intent);
-                    }, 500); // Adjust the delay as necessary
+                if (pinCodeManager.isAppLocked(currentPackageName)) {
+                    if (!pinCodeManager.isAppUnlocked() || !currentPackageName.equals(pinCodeManager.getUnlockedAppPackage())) {
+                        if (!isLockedActivityOpen || !currentPackageName.equals(currentLockedApp)) {
+                            Log.d(TAG, "Package is locked: " + currentPackageName);
+                            isLockedActivityOpen = true;
+                            currentLockedApp = currentPackageName;
+
+                            // Adding a small delay to ensure the locked activity is opened properly
+                            handler.postDelayed(() -> {
+                                if (!pinCodeManager.isAppUnlocked() || !currentPackageName.equals(pinCodeManager.getUnlockedAppPackage())) {
+                                    Intent intent = new Intent(AppLockService.this, EnterPinCodeActivity.class);
+                                    intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                                    intent.putExtra("locked_package_name", currentPackageName);
+                                    startActivity(intent);
+                                }
+                            }, 500);
+                        }
+                    }
+                } else {
+                    isLockedActivityOpen = false;
+                }
+
+                // Reset unlock state if the current app is different from the unlocked app
+                if (!currentPackageName.equals(pinCodeManager.getUnlockedAppPackage())) {
+                    pinCodeManager.resetUnlockState();
                 }
             }
         }
@@ -94,7 +110,13 @@ public class AppLockService extends AccessibilityService {
         public void onReceive(Context context, Intent intent) {
             if (ACTION_UNLOCK.equals(intent.getAction())) {
                 isLockedActivityOpen = false;
+                String lockedPackageName = pinCodeManager.getUnlockedAppPackage();
+                Log.d(TAG, "Unlocked app: " + lockedPackageName);
             }
         }
     };
+
+    public void setLockedActivityOpen(boolean isOpen) {
+        this.isLockedActivityOpen = isOpen;
+    }
 }

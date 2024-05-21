@@ -11,10 +11,8 @@ public class PinCodeManager {
 
     private static final String PREF_PIN_CODE_KEY = "pin_code";
     private static final String PREF_LOCKED_APPS_KEY = "locked_apps";
-    private static final String PREF_PIN_ENTERED_KEY = "pin_entered";
-    private static final String PIN_CODE_KEY = "PinCode";
-
-
+    private static final String PREF_IS_APP_UNLOCKED_KEY = "is_app_unlocked";
+    private static final String PREF_UNLOCKED_APP_PACKAGE_KEY = "unlocked_app_package";
     private SharedPreferences sharedPreferences;
 
     public PinCodeManager(Context context) {
@@ -55,21 +53,23 @@ public class PinCodeManager {
         return lockedApps.contains(packageName);
     }
 
-    public boolean isPinValid() {
-        String storedPin = sharedPreferences.getString(PREF_PIN_CODE_KEY, null);
-        return storedPin != null && !storedPin.isEmpty();
+    public boolean isAppUnlocked() {
+        return sharedPreferences.getBoolean(PREF_IS_APP_UNLOCKED_KEY, false);
     }
 
-    public boolean checkPinCode(String pinCode) {
-        String storedPinCode = sharedPreferences.getString(PIN_CODE_KEY, null);
-        return storedPinCode != null && storedPinCode.equals(pinCode);
+    public void setAppUnlocked(boolean unlocked) {
+        sharedPreferences.edit().putBoolean(PREF_IS_APP_UNLOCKED_KEY, unlocked).apply();
     }
 
-    public void setPinEntered(boolean entered) {
-        sharedPreferences.edit().putBoolean(PREF_PIN_ENTERED_KEY, entered).apply();
+    public void resetUnlockState() {
+        setAppUnlocked(false);
     }
 
-    public boolean isPinEntered() {
-        return sharedPreferences.getBoolean(PREF_PIN_ENTERED_KEY, false);
+    public void setUnlockedAppPackage(String packageName) {
+        sharedPreferences.edit().putString(PREF_UNLOCKED_APP_PACKAGE_KEY, packageName).apply();
+    }
+
+    public String getUnlockedAppPackage() {
+        return sharedPreferences.getString(PREF_UNLOCKED_APP_PACKAGE_KEY, "");
     }
 }
