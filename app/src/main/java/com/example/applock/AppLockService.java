@@ -90,7 +90,7 @@ public class AppLockService extends AccessibilityService {
                                     intent.putExtra("locked_package_name", currentPackageName);
                                     startActivity(intent);
                                 }
-                            }, 500);
+                            }, 100);
                         }
                     }
                 } else {
