@@ -40,13 +40,14 @@ public class AllAppsFragment extends Fragment {
 
         pinCodeManager = new PinCodeManager(requireContext());
 
-        swipeRefreshLayout.setOnRefreshListener(this::refreshIt);
+
 
         // Check if the pin code is set, if not, prompt user to set it
         if (!pinCodeManager.isPinCodeSet()) {
             setPinCode();
         } else if (!isPinVerified) {
             checkPinCode();
+            refreshIt();
         } else {
             // Continue with app loading
             refreshIt();
