@@ -11,4 +11,5 @@
     <color name="logo_border">#011c33</color>
     <color name="logo_background">#00223e</color>
     <color name="logo_color">#fcf8f9</color>
+    <color name="light_green">#64c097</color>
 </resources>

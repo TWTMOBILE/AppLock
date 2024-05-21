@@ -8,21 +8,26 @@
 
     <EditText
         android:id="@+id/editTextPin"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_width="200dp"
+        android:layout_height="50dp"
         android:layout_centerInParent="true"
         android:hint="Enter PIN code"
         android:textColor="@color/white"
         android:textColorHint="@color/white"
-        android:inputType="numberPassword" />
+        android:inputType="numberPassword"
+        android:textAlignment="center"
+        android:background="@drawable/button_design"/>
 
-    <Button
+    <androidx.appcompat.widget.AppCompatButton
         android:id="@+id/buttonSubmit"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_width="200dp"
+        android:layout_height="50dp"
         android:layout_below="@id/editTextPin"
         android:layout_centerHorizontal="true"
         android:layout_marginTop="16dp"
-        android:text="Submit" />
+        style="@style/CustomButtonStyle"
+        android:text="Submit"
+        android:textColor="@color/white"
+        android:background="@drawable/button_design"/>
 
 </RelativeLayout>

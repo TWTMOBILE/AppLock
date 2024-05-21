@@ -1,8 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<resources>
-    <style name="AppTheme.Button" parent="Widget.AppCompat.Button.Colored">
-        <item name="colorButtonNormal">@color/dark_blue</item>
-        <item name="android:textColor">@color/white</item>
-        <item name="strokeColor">@color/material_dynamic_primary90</item>
-    </style>
-</resources>

@@ -1,9 +1,9 @@
-<?xml version="1.0" encoding="utf-8"?>
-<shape xmlns:android="http://schemas.android.com/apk/res/android">
-    <solid android:color="@color/logo_background"/>
-
-    <corners
-        android:bottomLeftRadius="30dp"
-        android:bottomRightRadius="30dp"/>
-
-</shape>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="390dp"
+    android:height="128dp"
+    android:viewportWidth="390"
+    android:viewportHeight="128">
+    <path
+        android:pathData="M0,-19H390V83C390,107.85 369.85,128 345,128H45C20.15,128 0,107.85 0,83V-19Z"
+        android:fillColor="@color/logo_background"/>
+</vector>

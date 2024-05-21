@@ -27,6 +27,7 @@ public class AppAdapter extends ArrayAdapter<AppInfo> {
     private final List<AppInfo> apps;
     private final PinCodeManager pinCodeManager;
     private final Context context;
+    private boolean isSwitchProgrammatic = false;
 
     public AppAdapter(Context context, List<AppInfo> apps) {
         super(context, R.layout.app_item_layout, apps);
@@ -68,6 +69,9 @@ public class AppAdapter extends ArrayAdapter<AppInfo> {
         Drawable icon = current.info.loadIcon(packageManager);
         holder.imageView.setImageDrawable(icon);
 
+        // Remove any previous listener to avoid multiple calls
+        holder.switchCompat.setOnCheckedChangeListener(null);
+
         // Set the switch state based on saved preferences
         boolean isLocked = pinCodeManager.isAppLocked(current.info.packageName);
         holder.switchCompat.setChecked(isLocked);
@@ -75,6 +79,10 @@ public class AppAdapter extends ArrayAdapter<AppInfo> {
 
         // Add switch change listener
         holder.switchCompat.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            if (isSwitchProgrammatic) {
+                return;
+            }
+            isSwitchProgrammatic = true;
             if (isChecked) {
                 pinCodeManager.lockApp(current.info.packageName);
                 Log.d(TAG, "Locked app: " + current.info.packageName);
@@ -82,6 +90,7 @@ public class AppAdapter extends ArrayAdapter<AppInfo> {
                 pinCodeManager.unlockApp(current.info.packageName);
                 Log.d(TAG, "Unlocked app: " + current.info.packageName);
             }
+            isSwitchProgrammatic = false;
         });
 
         return convertView;
