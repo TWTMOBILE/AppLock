@@ -1,19 +1,35 @@
 <?xml version="1.0" encoding="utf-8"?>
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".SettingsFragment"
     android:background="@color/dark_blue">
 
-    <!-- TODO: Update blank fragment layout -->
-    <TextView
-        android:id="@+id/changePINTextView"
+    <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:text="Change PIN code"
-        android:padding="15dp"
-        android:textSize="20dp"
-        android:textColor="@color/white"/>
+        android:layout_height="55dp">
+        <TextView
+            android:id="@+id/changePINTextView"
+            android:layout_width="300dp"
+            android:layout_height="55dp"
+            android:layout_marginEnd="10dp"
+            android:text="Change PIN code"
+            android:padding="15dp"
+            android:textSize="20sp"
+            android:background="@drawable/button_design"
+            android:textColor="@color/white"/>
+
+        <ImageView
+            android:id="@+id/imageView4"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:padding="15dp"
+            android:background="@drawable/button_design"
+            android:src="@drawable/padlock" />
+    </LinearLayout>
+
 
 </FrameLayout>

@@ -2,4 +2,8 @@
     <string name="app_name">App Lock</string>
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="about_the_app">About This App:
+This application, developed by Davit Abulashvili, is designed to lock apps on Android devices, providing enhanced security and privacy for your applications.
+Copyright
+© 2024 Davit Abulashvili. All rights reserved.</string>
 </resources>

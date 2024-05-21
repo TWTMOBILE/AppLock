@@ -67,7 +67,6 @@ public class MainActivity extends AppCompatActivity {
         lockedAppsBtn = findViewById(R.id.lockedAppsBtn);
         homeBtn = findViewById(R.id.homeBtn);
         settingsBtn = findViewById(R.id.settingsBtn);
-        notificationsBtn= findViewById(R.id.notificationsBtn);
 
         allAppsBtn.setOnClickListener(view -> replaceFragment(new AllAppsFragment()));
 
@@ -77,7 +76,6 @@ public class MainActivity extends AppCompatActivity {
 
         settingsBtn.setOnClickListener(view -> replaceFragment(new SettingsFragment()));
 
-        notificationsBtn.setOnClickListener(view -> replaceFragment(new NotificationFragment()));
     }
 
     private void requestDeviceAdminPermission() {
