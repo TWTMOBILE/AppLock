@@ -25,7 +25,7 @@ import android.widget.Toast;
 
 public class MainActivity extends AppCompatActivity {
 
-    Button allAppsBtn, lockedAppsBtn, homeBtn, settingsBtn, notificationsBtn;
+    Button homeBtn, settingsBtn, notificationsBtn;
     ListView listView;
     SwipeRefreshLayout swipeRefreshLayout;
     boolean mIncludeSystemApps;
@@ -63,14 +63,8 @@ public class MainActivity extends AppCompatActivity {
         requestBatteryOptimizationPermission();
         requestDeviceAdminPermission();
 
-        allAppsBtn = findViewById(R.id.allAppsBtn);
-        lockedAppsBtn = findViewById(R.id.lockedAppsBtn);
         homeBtn = findViewById(R.id.homeBtn);
         settingsBtn = findViewById(R.id.settingsBtn);
-
-        allAppsBtn.setOnClickListener(view -> replaceFragment(new AllAppsFragment()));
-
-        lockedAppsBtn.setOnClickListener(view -> replaceFragment(new LockedAppsFragment()));
 
         homeBtn.setOnClickListener(view -> replaceFragment(new AllAppsFragment()));
 

@@ -3,31 +3,31 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/dark_blue"
+    android:background="@color/white"
     tools:context=".EnterPinCodeActivity">
 
     <EditText
         android:id="@+id/editTextPin"
-        android:layout_width="200dp"
+        android:layout_width="300dp"
         android:layout_height="55dp"
         android:layout_centerInParent="true"
         android:hint="Enter PIN code"
-        android:textColor="@color/white"
-        android:textColorHint="@color/white"
+        android:textColor="@color/gray"
+        android:textColorHint="@color/gray"
         android:inputType="numberPassword"
         android:textAlignment="center"
-        android:background="@drawable/button_design"/>
+        android:background="@drawable/general_edit_text_design"/>
 
     <androidx.appcompat.widget.AppCompatButton
         android:id="@+id/buttonSubmit"
-        android:layout_width="200dp"
+        android:layout_width="300dp"
         android:layout_height="55dp"
         android:layout_below="@id/editTextPin"
         android:layout_centerHorizontal="true"
         android:layout_marginTop="16dp"
         style="@style/CustomButtonStyle"
-        android:text="Submit"
+        android:text="Login"
         android:textColor="@color/white"
-        android:background="@drawable/button_design"/>
+        android:background="@drawable/button_design_enable"/>
 
 </RelativeLayout>

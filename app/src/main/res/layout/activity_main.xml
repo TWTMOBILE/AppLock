@@ -5,80 +5,42 @@
     android:id="@+id/linearLayout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/dark_blue"
+    android:background="@color/white"
     tools:context=".MainActivity">
 
-
-    <Button
-        android:id="@+id/allAppsBtn"
-        style="?android:attr/buttonBarButtonStyle"
-        android:layout_width="200sp"
-        android:layout_height="48sp"
-        android:width="50dp"
-        android:background="@color/dark_blue"
-        android:text="All Apps"
-        android:textColor="@color/white"
-        android:textSize="14sp"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/topBarImgView"
-        app:layout_constraintVertical_bias="0.15"
-        app:rippleColor="#1168EA" />
-
-    <Button
-        android:id="@+id/lockedAppsBtn"
-        style="?android:attr/buttonBarButtonStyle"
-        android:layout_width="200sp"
-        android:layout_height="48sp"
-        android:width="50dp"
-        android:background="@color/dark_blue"
-        android:text="Locked App"
-        android:textColor="@color/white"
-        android:textSize="14sp"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="1.0"
-        app:layout_constraintStart_toEndOf="@+id/allAppsBtn"
-        app:layout_constraintTop_toBottomOf="@+id/topBarImgView"
-        app:layout_constraintVertical_bias="0.15"
-        app:rippleColor="#1168EA" />
-
     <ImageView
-        android:id="@+id/topBarImgView"
-        android:layout_width="match_parent"
-        android:layout_height="57dp"
+        android:id="@+id/domino_logo"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:background="@drawable/domino_logo"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="1.0"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:srcCompat="@drawable/top_bar"
-        android:contentDescription="TODO" />
+        app:layout_constraintTop_toTopOf="parent" />
 
-    <ImageView
-        android:id="@+id/searchView"
+    <View
+        android:id="@+id/dividerView"
         android:layout_width="match_parent"
-        android:layout_height="0dp"
-        app:layout_constraintBottom_toBottomOf="@+id/topBarImgView"
-        app:layout_constraintEnd_toEndOf="parent"
-        android:background="@drawable/top_bar"
-        app:layout_constraintStart_toStartOf="@+id/topBarImgView"
-        app:layout_constraintTop_toTopOf="@+id/topBarImgView" />
+        android:layout_height="1dp"
+        android:background="@android:color/darker_gray"
+        app:layout_constraintTop_toBottomOf="@id/domino_logo"/>
 
     <androidx.fragment.app.FragmentContainerView
         android:id="@+id/fragmentContainerView"
         android:name="com.example.applock.AllAppsFragment"
         android:layout_width="match_parent"
         android:layout_height="0dp"
+        android:layout_marginTop="10dp"
         app:layout_constraintBottom_toTopOf="@+id/bottomBarImgView"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/allAppsBtn"
+        app:layout_constraintTop_toBottomOf="@+id/dividerView"
         tools:layout="@layout/fragment_all_apps" />
 
     <ImageView
         android:id="@+id/bottomBarImgView"
         android:layout_width="match_parent"
         android:layout_height="50dp"
+        android:contentDescription="TODO"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.0"

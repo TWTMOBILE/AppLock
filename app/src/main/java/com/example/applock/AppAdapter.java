@@ -46,9 +46,9 @@ public class AppAdapter extends ArrayAdapter<AppInfo> {
             convertView = layoutInflater.inflate(R.layout.app_item_layout, parent, false);
             holder = new ViewHolder();
             holder.textViewTitle = convertView.findViewById(R.id.titleTextView);
-            holder.textVersion = convertView.findViewById(R.id.versionId);
-            holder.imageView = convertView.findViewById(R.id.iconImage);
-            holder.switchCompat = convertView.findViewById(R.id.switchCompat);
+            holder.textVersion   = convertView.findViewById(R.id.versionId); // make sure this id exists
+            holder.imageView     = convertView.findViewById(R.id.iconImage);
+            holder.switchCompat  = convertView.findViewById(R.id.switchCompat);
             convertView.setTag(holder);
         } else {
             holder = (ViewHolder) convertView.getTag();
@@ -56,45 +56,49 @@ public class AppAdapter extends ArrayAdapter<AppInfo> {
 
         AppInfo current = apps.get(position);
 
-        holder.textViewTitle.setText(current.label);
+        // Icon
+        holder.imageView.setImageDrawable(current.info.loadIcon(packageManager));
 
+        // App name
+        CharSequence label = current.info.loadLabel(packageManager);
+        holder.textViewTitle.setText(TextUtils.isEmpty(label) ? current.info.packageName : label);
+
+        // Version (optional)
+        String versionText = "";
         try {
-            PackageInfo packageInfo = packageManager.getPackageInfo(current.info.packageName, 0);
-            String versionInfo = packageInfo.versionName;
-            holder.textVersion.setText(TextUtils.isEmpty(versionInfo) ? "N/A" : versionInfo);
+            PackageInfo pi;
+            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU) {
+                pi = packageManager.getPackageInfo(
+                        current.info.packageName,
+                        PackageManager.PackageInfoFlags.of(0)
+                );
+            } else {
+                pi = packageManager.getPackageInfo(current.info.packageName, 0);
+            }
+            versionText = pi.versionName != null ? "v" + pi.versionName : "";
         } catch (PackageManager.NameNotFoundException e) {
-            holder.textVersion.setText("N/A");
+            Log.w(TAG, "getPackageInfo failed for " + current.info.packageName, e);
         }
+        if (holder.textVersion != null) holder.textVersion.setText(versionText);
 
-        Drawable icon = current.info.loadIcon(packageManager);
-        holder.imageView.setImageDrawable(icon);
-
-        // Remove any previous listener to avoid multiple calls
+        // Switch (your existing logic)
         holder.switchCompat.setOnCheckedChangeListener(null);
-
-        // Set the switch state based on saved preferences
         boolean isLocked = pinCodeManager.isAppLocked(current.info.packageName);
         holder.switchCompat.setChecked(isLocked);
-        Log.d(TAG, "Package: " + current.info.packageName + " is locked: " + isLocked);
-
-        // Add switch change listener
         holder.switchCompat.setOnCheckedChangeListener((buttonView, isChecked) -> {
-            if (isSwitchProgrammatic) {
-                return;
-            }
+            if (isSwitchProgrammatic) return;
             isSwitchProgrammatic = true;
             if (isChecked) {
                 pinCodeManager.lockApp(current.info.packageName);
-                Log.d(TAG, "Locked app: " + current.info.packageName);
             } else {
                 pinCodeManager.unlockApp(current.info.packageName);
-                Log.d(TAG, "Unlocked app: " + current.info.packageName);
             }
             isSwitchProgrammatic = false;
         });
 
         return convertView;
     }
+
 
     static class ViewHolder {
         TextView textViewTitle;

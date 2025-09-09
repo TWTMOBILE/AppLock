@@ -12,4 +12,9 @@
     <color name="logo_background">#00223e</color>
     <color name="logo_color">#fcf8f9</color>
     <color name="light_green">#64c097</color>
+    <color name="orange_domino">#FFB648</color>
+    <color name="gray">#6D675E</color>
+    <color name="green_domino">#4F966B</color>
+    <color name="light_gray">#BFBFBF</color>
+
 </resources>

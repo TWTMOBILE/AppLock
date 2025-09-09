@@ -119,7 +119,6 @@ public class AllAppsFragment extends Fragment {
                         // Create AppInfo object
                         AppInfo app = new AppInfo();
                         app.info = info;
-                        app.label = label != null ? label.toString() : info.packageName; // Use package name if label is null
                         app.icon = icon;
                         apps.add(app);
                     }

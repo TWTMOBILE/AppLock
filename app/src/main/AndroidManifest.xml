@@ -8,11 +8,12 @@
     <uses-permission android:name="android.permission.BIND_ACCESSIBILITY_SERVICE"/>
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE"/>
 
+
     <application
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
         android:fullBackupContent="@xml/backup_rules"
-        android:icon="@drawable/padlock"
+        android:icon="@drawable/ic_app_lock"
         android:label="@string/app_name"
         android:supportsRtl="true"
         android:theme="@style/Theme.AppLock"
@@ -28,6 +29,12 @@
                 android:name="android.accessibilityservice"
                 android:resource="@xml/accessibility_service_config" />
         </service>
+        <receiver android:name=".SimStateReceiver"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.SIM_STATE_CHANGED"/>
+            </intent-filter>
+        </receiver>
 
         <service android:name=".AppLockForegroundService"
             android:foregroundServiceType="connectedDevice"/>
@@ -44,16 +51,16 @@
         </receiver>
         <activity
             android:name=".EnterPinCodeActivity"
+            android:exported="false"
             android:launchMode="singleTask"
-            android:screenOrientation="portrait"
-            android:exported="false" />
+            android:noHistory="true"
+            android:excludeFromRecents="true" />
+
         <activity
             android:name=".SetPinCodeActivity"
-            android:screenOrientation="portrait"
             android:exported="false" />
         <activity
             android:name=".SplashScreenActivity"
-            android:screenOrientation="portrait"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -63,13 +70,7 @@
         </activity>
         <activity
             android:name=".MainActivity"
-            android:screenOrientation="portrait"
             android:exported="true">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
         </activity>
     </application>
 </manifest>
