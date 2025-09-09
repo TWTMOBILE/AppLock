@@ -36,10 +36,15 @@ public class MainActivity extends AppCompatActivity {
     private DevicePolicyManager devicePolicyManager;
     private ComponentName deviceAdminComponent;
 
+    private PinCodeManager pinCodeManager;
+    private boolean isAuthenticated = false;
+    private static final int REQUEST_PIN_CODE = 9999;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        pinCodeManager = new PinCodeManager(this);
         AllAppsFragment allAppsFragment = new AllAppsFragment();
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
@@ -65,6 +70,8 @@ public class MainActivity extends AppCompatActivity {
 
         homeBtn = findViewById(R.id.homeBtn);
         settingsBtn = findViewById(R.id.settingsBtn);
+
+
 
         homeBtn.setOnClickListener(view -> replaceFragment(new AllAppsFragment()));
 
@@ -95,6 +102,24 @@ public class MainActivity extends AppCompatActivity {
     }
 
     @Override
+    protected void onResume() {
+        super.onResume();
+        // Require PIN if not authenticated
+        if (!isAuthenticated && pinCodeManager.isPinCodeSet()) {
+            Intent intent = new Intent(this, EnterPinCodeActivity.class);
+            intent.putExtra("locked_package_name", getPackageName());
+            startActivityForResult(intent, REQUEST_PIN_CODE);
+        }
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        // Reset authentication when app is backgrounded
+        isAuthenticated = false;
+    }
+
+    @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == REQUEST_CODE_OVERLAY_PERMISSION) {
@@ -102,6 +127,13 @@ public class MainActivity extends AppCompatActivity {
                 if (!Settings.canDrawOverlays(this)) {
                     Toast.makeText(this, "Overlay permission is needed", Toast.LENGTH_SHORT).show();
                 }
+            }
+        } else if (requestCode == REQUEST_PIN_CODE) {
+            if (resultCode == RESULT_OK) {
+                isAuthenticated = true;
+            } else {
+                // If PIN not entered, finish the app
+                finish();
             }
         }
     }

@@ -6,4 +6,5 @@
 This application, developed by Davit Abulashvili, is designed to lock apps on Android devices, providing enhanced security and privacy for your applications.
 Copyright
 © 2024 Davit Abulashvili. All rights reserved.</string>
+    <string name="accessibility_service_description">App Lock needs accessibility service to detect when protected apps are launched and show the lock screen. This allows the app to keep your selected apps secure.</string>
 </resources>

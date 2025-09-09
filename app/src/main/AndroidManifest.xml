@@ -1,12 +1,22 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
+
+    <!-- So you can list launchable apps without QUERY_ALL_PACKAGES -->
     <queries>
-        <package android:name="android" />
+        <intent>
+            <action android:name="android.intent.action.MAIN" />
+            <category android:name="android.intent.category.LAUNCHER" />
+        </intent>
     </queries>
-    <uses-permission android:name="android.permission.QUERY_ALL_PACKAGES" />
-    <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW"/>
-    <uses-permission android:name="android.permission.BIND_ACCESSIBILITY_SERVICE"/>
-    <uses-permission android:name="android.permission.FOREGROUND_SERVICE"/>
+
+    <!-- Permissions -->
+    <!-- Overlay for optional UI; granted via Settings -->
+    <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
+    <!-- Foreground service + type (Android 14+) -->
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_CONNECTED_DEVICE" />
+    <!-- Notifications (Android 13+) if you plan to show your FGS notification as normal) -->
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
 
 
     <application
@@ -18,9 +28,11 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.AppLock"
         tools:targetApi="31">
+
+        <!-- Accessibility detector -->
         <service
             android:name=".AppLockService"
-            android:exported="true"
+            android:exported="false"
             android:permission="android.permission.BIND_ACCESSIBILITY_SERVICE">
             <intent-filter>
                 <action android:name="android.accessibilityservice.AccessibilityService" />
@@ -29,17 +41,24 @@
                 android:name="android.accessibilityservice"
                 android:resource="@xml/accessibility_service_config" />
         </service>
-        <receiver android:name=".SimStateReceiver"
+
+        <!-- Foreground keep-alive service -->
+        <service
+            android:name=".AppLockForegroundService"
+            android:exported="false"
+            android:foregroundServiceType="connectedDevice" />
+
+        <receiver
+            android:name=".SimStateReceiver"
             android:exported="true">
             <intent-filter>
-                <action android:name="android.intent.action.SIM_STATE_CHANGED"/>
+                <action android:name="android.intent.action.SIM_STATE_CHANGED" />
             </intent-filter>
         </receiver>
 
-        <service android:name=".AppLockForegroundService"
-            android:foregroundServiceType="connectedDevice"/>
-
-        <receiver android:name=".AppDeviceAdminReceiver"
+        <!-- Device Admin receiver -->
+        <receiver
+            android:name=".AppDeviceAdminReceiver"
             android:exported="true"
             android:permission="android.permission.BIND_DEVICE_ADMIN">
             <meta-data
@@ -49,28 +68,34 @@
                 <action android:name="android.app.action.DEVICE_ADMIN_ENABLED" />
             </intent-filter>
         </receiver>
+
+        <!-- Lock screen for protected apps -->
         <activity
             android:name=".EnterPinCodeActivity"
             android:exported="false"
             android:launchMode="singleTask"
             android:noHistory="true"
-            android:excludeFromRecents="true" />
+            android:excludeFromRecents="true"
+            android:showWhenLocked="true"
+            android:turnScreenOn="true" />
 
+        <!-- Initial PIN setup -->
         <activity
             android:name=".SetPinCodeActivity"
             android:exported="false" />
+
+        <!-- Launcher -->
         <activity
             android:name=".SplashScreenActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
         <activity
             android:name=".MainActivity"
-            android:exported="true">
-        </activity>
+            android:exported="true" />
     </application>
 </manifest>
