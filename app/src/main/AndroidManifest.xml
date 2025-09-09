@@ -17,6 +17,12 @@
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_CONNECTED_DEVICE" />
     <!-- Notifications (Android 13+) if you plan to show your FGS notification as normal) -->
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+    <!-- Additional permissions for persistence -->
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+    <uses-permission android:name="android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS" />
+    <uses-permission android:name="android.permission.SYSTEM_OVERLAY_WINDOW" />
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
+    <uses-permission android:name="android.permission.DISABLE_KEYGUARD" />
 
 
     <application
@@ -32,8 +38,11 @@
         <!-- Accessibility detector -->
         <service
             android:name=".AppLockService"
+            android:enabled="true"
             android:exported="false"
-            android:permission="android.permission.BIND_ACCESSIBILITY_SERVICE">
+            android:permission="android.permission.BIND_ACCESSIBILITY_SERVICE"
+            android:foregroundServiceType="dataSync"
+            android:persistent="true">
             <intent-filter>
                 <action android:name="android.accessibilityservice.AccessibilityService" />
             </intent-filter>
@@ -45,8 +54,10 @@
         <!-- Foreground keep-alive service -->
         <service
             android:name=".AppLockForegroundService"
+            android:enabled="true"
             android:exported="false"
-            android:foregroundServiceType="connectedDevice" />
+            android:foregroundServiceType="dataSync"
+            android:persistent="true" />
 
         <receiver
             android:name=".SimStateReceiver"
@@ -66,6 +77,19 @@
                 android:resource="@xml/device_admin_reciever" />
             <intent-filter>
                 <action android:name="android.app.action.DEVICE_ADMIN_ENABLED" />
+            </intent-filter>
+        </receiver>
+
+        <!-- Boot receiver for auto-start -->
+        <receiver
+            android:name=".BootReceiver"
+            android:enabled="true"
+            android:exported="true"
+            android:permission="android.permission.RECEIVE_BOOT_COMPLETED">
+            <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
+                <action android:name="android.intent.action.MY_PACKAGE_REPLACED" />
+                <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </receiver>
 
