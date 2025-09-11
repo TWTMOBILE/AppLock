@@ -101,6 +101,11 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    public void setPinCode() {
+        Intent intent = new Intent(this, SetPinCodeActivity.class);
+        startActivityForResult(intent, REQUEST_PIN_CODE);
+    }
+
     @Override
     protected void onResume() {
         super.onResume();
@@ -110,6 +115,48 @@ public class MainActivity extends AppCompatActivity {
             intent.putExtra("locked_package_name", getPackageName());
             startActivityForResult(intent, REQUEST_PIN_CODE);
         }
+
+        // Check and request necessary permissions
+        checkAndRequestPermissions();
+    }
+
+    private void checkAndRequestPermissions() {
+        if (!Settings.canDrawOverlays(this)) {
+            Intent intent = new Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
+                    Uri.parse("package:" + getPackageName()));
+            startActivityForResult(intent, REQUEST_CODE_OVERLAY_PERMISSION);
+            return;
+        }
+
+        // Make sure accessibility service is running
+        String service = getPackageName() + "/" + AppLockService.class.getName();
+        String enabledServices = Settings.Secure.getString(getContentResolver(),
+                Settings.Secure.ENABLED_ACCESSIBILITY_SERVICES);
+        if (enabledServices == null || !enabledServices.contains(service)) {
+            Toast.makeText(this, "Please enable Accessibility Service", Toast.LENGTH_LONG).show();
+            startActivity(new Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS));
+        }
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        if (requestCode == REQUEST_PIN_CODE) {
+            if (resultCode == RESULT_OK) {
+                isAuthenticated = true;
+                // Start the service to monitor apps
+                startService(new Intent(this, AppLockService.class));
+            } else {
+                // If PIN not entered or set, finish the app
+                finish();
+            }
+        } else if (requestCode == REQUEST_CODE_OVERLAY_PERMISSION) {
+            if (!Settings.canDrawOverlays(this)) {
+                Toast.makeText(this, "Overlay permission is required", Toast.LENGTH_SHORT).show();
+                finish();
+            }
+        }
     }
 
     @Override
@@ -117,25 +164,6 @@ public class MainActivity extends AppCompatActivity {
         super.onPause();
         // Reset authentication when app is backgrounded
         isAuthenticated = false;
-    }
-
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-        if (requestCode == REQUEST_CODE_OVERLAY_PERMISSION) {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                if (!Settings.canDrawOverlays(this)) {
-                    Toast.makeText(this, "Overlay permission is needed", Toast.LENGTH_SHORT).show();
-                }
-            }
-        } else if (requestCode == REQUEST_PIN_CODE) {
-            if (resultCode == RESULT_OK) {
-                isAuthenticated = true;
-            } else {
-                // If PIN not entered, finish the app
-                finish();
-            }
-        }
     }
 
     private void replaceFragment(Fragment fragment){

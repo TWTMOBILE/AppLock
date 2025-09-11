@@ -6,10 +6,11 @@
 
     <ImageView
         android:id="@+id/splashIcon"
-        android:layout_width="96dp"
-        android:layout_height="96dp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
         android:layout_centerInParent="true"
-        android:src="@drawable/padlock" />
+        android:contentDescription="TODO"
+        android:src="@drawable/ic_app_lock" />
 
     <ProgressBar
         android:id="@+id/progressBar"

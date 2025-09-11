@@ -5,39 +5,32 @@ import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
 
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
 public class PinCodeManager {
-
     private static final String PREF_PIN_CODE_KEY = "pin_code";
     private static final String PREF_LOCKED_APPS_KEY = "locked_apps";
-    private static final String PREF_IS_APP_UNLOCKED_KEY = "is_app_unlocked";
-    private static final String PREF_UNLOCKED_APP_PACKAGE_KEY = "unlocked_app_package";
-    private static final String PREF_UNLOCK_TIMESTAMP_KEY = "unlocked_app_timestamp";
-    private static final long UNLOCK_TIMEOUT_MS = 30 * 1000; // 30 seconds
+
+    // Per-app temp unlock expiry keys: "temp_unlock_until_<pkg>" -> long (epoch millis)
+    private static final String TEMP_UNLOCK_PREFIX = "temp_unlock_until_";
 
     private final SharedPreferences sharedPreferences;
 
     public PinCodeManager(Context context) {
-        this.sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context.getApplicationContext());
+        this.sharedPreferences = PreferenceManager.getDefaultSharedPreferences(
+                context.getApplicationContext());
     }
 
     // --- PIN ---
     public void savePinCode(String pinCode) {
         sharedPreferences.edit().putString(PREF_PIN_CODE_KEY, pinCode).apply();
     }
-
-    public String getPinCode() {
-        return sharedPreferences.getString(PREF_PIN_CODE_KEY, "");
-    }
-
-    public boolean isPinCodeSet() {
-        return sharedPreferences.contains(PREF_PIN_CODE_KEY);
-    }
-
+    public String getPinCode() { return sharedPreferences.getString(PREF_PIN_CODE_KEY, ""); }
+    public boolean isPinCodeSet() { return sharedPreferences.contains(PREF_PIN_CODE_KEY); }
     public boolean validatePinCode(String enteredPinCode) {
-        String savedPinCode = getPinCode();
-        return enteredPinCode.equals(savedPinCode);
+        String savedPin = getPinCode();
+        return enteredPinCode.equals(savedPin);
     }
 
     // --- Locked apps list ---
@@ -47,50 +40,52 @@ public class PinCodeManager {
         copy.add(packageName);
         sharedPreferences.edit().putStringSet(PREF_LOCKED_APPS_KEY, copy).apply();
     }
-
     public void unlockApp(String packageName) {
         Set<String> current = sharedPreferences.getStringSet(PREF_LOCKED_APPS_KEY, new HashSet<>());
         Set<String> copy = new HashSet<>(current);
         copy.remove(packageName);
         sharedPreferences.edit().putStringSet(PREF_LOCKED_APPS_KEY, copy).apply();
+        resetTempUnlock(packageName);
     }
-
     public boolean isAppLocked(String packageName) {
         Set<String> current = sharedPreferences.getStringSet(PREF_LOCKED_APPS_KEY, new HashSet<>());
         return current.contains(packageName);
     }
 
-    // --- Temporary unlock state for a single package ---
-    public void markAppUnlocked(String packageName) {
-        long now = System.currentTimeMillis();
-        sharedPreferences.edit()
-                .putBoolean(PREF_IS_APP_UNLOCKED_KEY, true)
-                .putString(PREF_UNLOCKED_APP_PACKAGE_KEY, packageName)
-                .putLong(PREF_UNLOCK_TIMESTAMP_KEY, now)
-                .apply();
+    // --- Temporary unlocks with TTL ---
+    private String k(String pkg) { return TEMP_UNLOCK_PREFIX + pkg; }
+
+    /** Grant a temp unlock until now + graceMs (e.g., 10_000..60_000). */
+    public void unlockAppTemporarily(String packageName, long graceMs) {
+        long until = System.currentTimeMillis() + Math.max(0, graceMs);
+        sharedPreferences.edit().putLong(k(packageName), until).apply();
     }
 
-    public boolean isAppUnlocked() {
-        boolean unlocked = sharedPreferences.getBoolean(PREF_IS_APP_UNLOCKED_KEY, false);
-        if (!unlocked) return false;
-        long ts = sharedPreferences.getLong(PREF_UNLOCK_TIMESTAMP_KEY, 0);
-        long now = System.currentTimeMillis();
-        if (now - ts > UNLOCK_TIMEOUT_MS) {
-            resetUnlockState();
-            return false;
+    /** Is temp unlock still valid (now < expiry)? */
+    public boolean isAppTemporarilyUnlocked(String packageName) {
+        long until = sharedPreferences.getLong(k(packageName), 0L);
+        if (until <= 0L) return false;
+        if (System.currentTimeMillis() < until) return true;
+        // expired: clean up
+        sharedPreferences.edit().remove(k(packageName)).apply();
+        return false;
+    }
+
+    /** Revoke temp unlock for a specific app. */
+    public void resetTempUnlock(String packageName) {
+        sharedPreferences.edit().remove(k(packageName)).apply();
+    }
+
+    /** Revoke all temp unlocks (best-effort). Call on SCREEN_OFF. */
+    public void clearAllTempUnlocks() {
+        // Best-effort sweep: iterate over all keys and remove our prefix
+        Map<String, ?> all = sharedPreferences.getAll();
+        SharedPreferences.Editor ed = sharedPreferences.edit();
+        for (String key : all.keySet()) {
+            if (key != null && key.startsWith(TEMP_UNLOCK_PREFIX)) {
+                ed.remove(key);
+            }
         }
-        return true;
-    }
-
-    public String getUnlockedAppPackage() {
-        return sharedPreferences.getString(PREF_UNLOCKED_APP_PACKAGE_KEY, "");
-    }
-
-    public void resetUnlockState() {
-        sharedPreferences.edit()
-                .putBoolean(PREF_IS_APP_UNLOCKED_KEY, false)
-                .remove(PREF_UNLOCKED_APP_PACKAGE_KEY)
-                .remove(PREF_UNLOCK_TIMESTAMP_KEY)
-                .apply();
+        ed.apply();
     }
 }

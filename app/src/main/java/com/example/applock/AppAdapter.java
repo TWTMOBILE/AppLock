@@ -85,15 +85,34 @@ public class AppAdapter extends ArrayAdapter<AppInfo> {
         holder.switchCompat.setOnCheckedChangeListener(null);
         boolean isLocked = pinCodeManager.isAppLocked(current.info.packageName);
         holder.switchCompat.setChecked(isLocked);
+        current.isLocked = isLocked;  // Update the model
+
         holder.switchCompat.setOnCheckedChangeListener((buttonView, isChecked) -> {
             if (isSwitchProgrammatic) return;
+
+            if (!pinCodeManager.isPinCodeSet()) {
+                // If no PIN set, ask to set one first
+                isSwitchProgrammatic = true;
+                holder.switchCompat.setChecked(false);
+                isSwitchProgrammatic = false;
+                if (context instanceof MainActivity) {
+                    ((MainActivity) context).setPinCode();
+                }
+                return;
+            }
+
             isSwitchProgrammatic = true;
             if (isChecked) {
                 pinCodeManager.lockApp(current.info.packageName);
+                current.isLocked = true;
             } else {
                 pinCodeManager.unlockApp(current.info.packageName);
+                current.isLocked = false;
             }
             isSwitchProgrammatic = false;
+
+            // Log the action
+            Log.d(TAG, "App " + current.info.packageName + " lock state changed to: " + isChecked);
         });
 
         return convertView;

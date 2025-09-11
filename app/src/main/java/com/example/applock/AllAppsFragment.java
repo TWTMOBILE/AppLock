@@ -55,29 +55,11 @@ public class AllAppsFragment extends Fragment {
 
         // Pull-to-refresh listener
         swipeRefreshLayout.setOnRefreshListener(() -> {
-            // If PIN isn’t set/verified yet, route to PIN and stop spinner
-            if (!pinCodeManager.isPinCodeSet()) {
-                swipeRefreshLayout.setRefreshing(false);
-                setPinCode();
-                return;
-            }
-            if (!isPinVerified) {
-                swipeRefreshLayout.setRefreshing(false);
-                checkPinCode();
-                return;
-            }
             refreshIt();
         });
 
-        // Initial flow
-        if (!pinCodeManager.isPinCodeSet()) {
-            setPinCode();
-        } else if (!isPinVerified) {
-            checkPinCode();
-            refreshIt(); // kick an initial load; if PIN screen overlays, that’s fine
-        } else {
-            refreshIt();
-        }
+        // Initial load
+        refreshIt();
 
         return view;
     }
@@ -121,86 +103,55 @@ public class AllAppsFragment extends Fragment {
     }
 
     private void refreshIt() {
-        // Ensure single loader
         if (currentTask != null) {
             currentTask.cancel(true);
-            currentTask = null;
         }
         currentTask = new LoadAppInfoTask();
-        currentTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+        currentTask.execute();
     }
 
     private class LoadAppInfoTask extends AsyncTask<Void, Void, List<AppInfo>> {
-
-        private Exception error;
-
-        @Override
-        protected void onPreExecute() {
-            super.onPreExecute();
-            if (swipeRefreshLayout != null) swipeRefreshLayout.setRefreshing(true);
-        }
-
         @Override
         protected List<AppInfo> doInBackground(Void... voids) {
+            PackageManager pm = requireContext().getPackageManager();
             List<AppInfo> apps = new ArrayList<>();
-            try {
-                PackageManager packageManager = requireContext().getPackageManager();
-                List<ApplicationInfo> infos =
-                        packageManager.getInstalledApplications(PackageManager.GET_META_DATA);
 
-                for (ApplicationInfo info : infos) {
-                    if (isCancelled()) break;
-
-                    try {
-                        Intent launchIntent = packageManager.getLaunchIntentForPackage(info.packageName);
-                        if (launchIntent != null) {
-                            // Build AppInfo object as per your model
-                            Drawable icon = info.loadIcon(packageManager);
-                            AppInfo app = new AppInfo();
-                            app.info = info;
-                            app.icon = icon;
-                            apps.add(app);
-                        }
-                    } catch (Exception inner) {
-                        Log.e("LoadAppInfoTask", "Error loading app: " + info.packageName + " -> " + inner.getMessage());
-                    }
+            List<ApplicationInfo> packages = pm.getInstalledApplications(PackageManager.GET_META_DATA);
+            for (ApplicationInfo packageInfo : packages) {
+                // Skip system apps unless they're on sdcard
+                if ((packageInfo.flags & ApplicationInfo.FLAG_SYSTEM) != 0
+                        && (packageInfo.flags & ApplicationInfo.FLAG_UPDATED_SYSTEM_APP) == 0) {
+                    continue;
                 }
-            } catch (Exception e) {
-                error = e;
+
+                // Skip our own app
+                if (packageInfo.packageName.equals(requireContext().getPackageName())) {
+                    continue;
+                }
+
+                AppInfo appInfo = new AppInfo();
+                appInfo.info = packageInfo;
+                appInfo.isLocked = pinCodeManager.isAppLocked(packageInfo.packageName);
+                apps.add(appInfo);
             }
+
             return apps;
         }
 
         @Override
         protected void onPostExecute(List<AppInfo> appInfos) {
-            super.onPostExecute(appInfos);
-            if (!isAdded()) return;
-
-            if (adapter == null) {
+            if (isAdded()) {
                 adapter = new AppAdapter(requireContext(), appInfos);
                 listView.setAdapter(adapter);
-            } else {
-                adapter.clear();
-                adapter.addAll(appInfos);
-                adapter.notifyDataSetChanged();
+                swipeRefreshLayout.setRefreshing(false);
             }
-
-            if (swipeRefreshLayout != null) swipeRefreshLayout.setRefreshing(false);
-
-            if (error != null) {
-                Snackbar.make(listView, "Refresh failed: " + error.getMessage(), Snackbar.LENGTH_LONG).show();
-            } else {
-                Snackbar.make(listView, appInfos.size() + " launchable applications loaded", Snackbar.LENGTH_LONG).show();
-            }
-            currentTask = null;
         }
+    }
 
-        @Override
-        protected void onCancelled() {
-            super.onCancelled();
-            if (!isAdded()) return;
-            if (swipeRefreshLayout != null) swipeRefreshLayout.setRefreshing(false);
-            currentTask = null;
-        }
+    @Override
+    public void onResume() {
+        super.onResume();
+        // Refresh list to update lock states
+        refreshIt();
     }
 }
